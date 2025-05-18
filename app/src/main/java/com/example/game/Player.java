@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.RectF;
 import android.media.MediaPlayer;
 
@@ -19,13 +18,14 @@ public class Player {
     private boolean jumping = false;
     private Context context;
 
-    public Player(Context context) {
+    public Player(Context context, int selectedCharacter) {
         this.context = context;
+        this.currentCharacter = selectedCharacter;
         loadSprites();
     }
 
     private void loadSprites() {
-        Bitmap spriteSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.player_spritesheet);
+        Bitmap spriteSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.player_spritesheett);
         int frameWidth = spriteSheet.getWidth() / 3;
         int frameHeight = spriteSheet.getHeight() / 2;
 

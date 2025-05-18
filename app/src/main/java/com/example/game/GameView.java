@@ -38,13 +38,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     private final long coinCooldown = 500; // em milissegundos
     private final float minCoinSpacing = 300; // espaço mínimo entre moedas
 
-    public GameView(Context context) {
+    public GameView(Context context, int character) {
         super(context);
 
         background = BitmapFactory.decodeResource(getResources(), R.drawable.background);
         getHolder().addCallback(this);
 
-        player = new Player(context);
+        player = new Player(context, character);
 
         Random rand = new Random();
         int numCoins = rand.nextInt(6) + 5; // entre 5 e 10 moedas
@@ -97,7 +97,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         }
 
         for (Obstacle obs : obstacles) {
-            obs.move(-12);
+            obs.move(-15);
 
             if (obs.isActive() && RectF.intersects(player.getBounds(), obs.getBounds())) {
                 obs.deactivate();
