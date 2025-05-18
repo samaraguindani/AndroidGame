@@ -26,6 +26,7 @@ public class Coin {
         }
     }
 
+    // RectF define a área de colisão do objeto como um retângulo flutuante (x, y, largura, altura)
     public RectF getBounds() {
         return new RectF(x, y, x + image.getWidth(), y + image.getHeight());
     }

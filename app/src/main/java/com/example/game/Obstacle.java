@@ -13,7 +13,7 @@ public class Obstacle {
 
     public Obstacle(Context context, float x, float y) {
         this.image = BitmapFactory.decodeResource(context.getResources(), R.drawable.rock);
-        this.image = Bitmap.createScaledBitmap(this.image, 128, 128, true); // ajuste se necessário
+        this.image = Bitmap.createScaledBitmap(this.image, 128, 128, true);
         this.x = x;
         this.y = y;
     }

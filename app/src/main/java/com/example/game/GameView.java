@@ -25,18 +25,12 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     private Player player;
     private SensorManager sensorManager;
     private Bitmap background;
+    private MediaPlayer backgroundMusic;
     private Random rand = new Random();
     private float accelX = 0;
     private List<Coin> coins = new ArrayList<>();
     private List<Obstacle> obstacles = new ArrayList<>();
     private int score = 0;
-    private float nextCoinX = 1000; // onde a próxima moeda pode ser gerada
-    private final float coinSpacing = 300; // distância mínima entre moedas
-    private final float coinGenerationRange = 3000; // limite da tela visível simulada
-    private long lastCoinTime = 0;
-    private float lastCoinX = 0;
-    private final long coinCooldown = 500; // em milissegundos
-    private final float minCoinSpacing = 300; // espaço mínimo entre moedas
 
     public GameView(Context context, int character) {
         super(context);
@@ -46,15 +40,13 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
 
         player = new Player(context, character);
 
-        Random rand = new Random();
+        //grear moedas random
         int numCoins = rand.nextInt(6) + 5; // entre 5 e 10 moedas
-
         for (int i = 0; i < numCoins; i++) {
             float x = rand.nextInt(1200) + 800; // entre 800 e 3000 (fora da tela)
             float y = 990 + rand.nextInt(21);   // entre 990 e 1010
             coins.add(new Coin(context, x, y));
         }
-
 
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         sensorManager.registerListener(this,
@@ -63,10 +55,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
 
         thread = new GameThread(getHolder(), this);
         setFocusable(true);
+
+        backgroundMusic = MediaPlayer.create(context, R.raw.background_music);
+        backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(1.0f, 1.0f);
+        backgroundMusic.start();
+
     }
 
     public void update() {
-        player.update(0); // personagem parado
+        player.update(0);
 
         // Atualiza moedas e verifica colisões
         for (Coin coin : coins) {
@@ -102,11 +100,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
             if (obs.isActive() && RectF.intersects(player.getBounds(), obs.getBounds())) {
                 obs.deactivate();
                 score = Math.max(0, score - 1);
-                // MediaPlayer.create(getContext(), R.raw.hit_sound).start(); // opcional
             }
         }
 
-// Remove obstáculos fora da tela
+        // Remove obstáculos fora da tela
         obstacles.removeIf(obs -> obs.getX() < -100);
     }
 
@@ -182,6 +179,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
 
     public void pause() {
         thread.setRunning(false);
+        if (backgroundMusic != null && backgroundMusic.isPlaying()) {
+            backgroundMusic.pause();
+        }
         try {
             thread.join();
         } catch (InterruptedException e) {
@@ -189,13 +189,18 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         }
     }
 
+
     public void resume() {
         if (thread == null || !thread.isAlive()) {
             thread = new GameThread(getHolder(), this);
             thread.setRunning(true);
             thread.start();
         }
+        if (backgroundMusic != null && !backgroundMusic.isPlaying()) {
+            backgroundMusic.start();
+        }
     }
+
 
     public void swapCharacter() {
         player.swapCharacter();
