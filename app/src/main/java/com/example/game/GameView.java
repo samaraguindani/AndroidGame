@@ -31,6 +31,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     private List<Coin> coins = new ArrayList<>();
     private List<Obstacle> obstacles = new ArrayList<>();
     private int score = 0;
+    private boolean isPaused = false;
 
     public GameView(Context context, int character) {
         super(context);
@@ -178,6 +179,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
     public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
     public void pause() {
+        isPaused = true;
         thread.setRunning(false);
         if (backgroundMusic != null && backgroundMusic.isPlaying()) {
             backgroundMusic.pause();
@@ -189,8 +191,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         }
     }
 
-
     public void resume() {
+        isPaused = false;
         if (thread == null || !thread.isAlive()) {
             thread = new GameThread(getHolder(), this);
             thread.setRunning(true);
@@ -199,6 +201,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Sen
         if (backgroundMusic != null && !backgroundMusic.isPlaying()) {
             backgroundMusic.start();
         }
+    }
+
+    public boolean isPaused() {
+        return isPaused;
     }
 
 

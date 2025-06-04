@@ -8,15 +8,16 @@ import android.graphics.RectF;
 import android.media.MediaPlayer;
 
 public class Player {
-    private Bitmap[][] spriteFrames; // [personagem][frame]
-    private int currentCharacter = 0; // 0: guerreiro, 1: maga
+    private Bitmap[] walkFrames;
+    private Bitmap jumpFrame;
     private int currentFrame = 0;
     private long lastFrameTime = 0;
     private int frameInterval = 150;
-    private float x = 100, y = 1200;
+    private float x = 100, y = 1400;
     private float velocityY = 0;
     private boolean jumping = false;
     private Context context;
+    private int currentCharacter = 0; // 0: menino, 1: menina
 
     public Player(Context context, int selectedCharacter) {
         this.context = context;
@@ -25,23 +26,41 @@ public class Player {
     }
 
     private void loadSprites() {
-        Bitmap spriteSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.player_spritesheett);
-        int frameWidth = spriteSheet.getWidth() / 3;
+        Bitmap spriteSheet;
+        if (currentCharacter == 0) {
+            spriteSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.boy_sheet);
+        } else {
+            spriteSheet = BitmapFactory.decodeResource(context.getResources(), R.drawable.girl_sheet);
+        }
+
+        int frameWidth = spriteSheet.getWidth() / 6;
         int frameHeight = spriteSheet.getHeight() / 2;
 
-        spriteFrames = new Bitmap[2][3];
+        walkFrames = new Bitmap[6];
 
-        // Guerreiro (linha 0)
-        for (int i = 0; i < 3; i++) {
-            spriteFrames[0][i] = Bitmap.createBitmap(spriteSheet, i * frameWidth, 0, frameWidth, frameHeight);
+        for (int i = 0; i < 6; i++) {
+            Bitmap original = Bitmap.createBitmap(spriteSheet, i * frameWidth, 0, frameWidth, frameHeight);
+
+            if (currentCharacter == 1) {
+                int scaledW = (int) (frameWidth * 1.5f);
+                int scaledH = (int) (frameHeight * 1.5f);
+                walkFrames[i] = Bitmap.createScaledBitmap(original, scaledW, scaledH, true);
+            } else {
+                walkFrames[i] = original;
+            }
         }
 
-        // Maga (linha 1)
-        for (int i = 0; i < 3; i++) {
-            spriteFrames[1][i] = Bitmap.createBitmap(spriteSheet, i * frameWidth, frameHeight, frameWidth, frameHeight);
+        Bitmap jumpOriginal = Bitmap.createBitmap(spriteSheet, 2 * frameWidth, frameHeight, frameWidth, frameHeight);
+        if (currentCharacter == 1) {
+            int scaledW = (int) (frameWidth * 1.5f);
+            int scaledH = (int) (frameHeight * 1.5f);
+            jumpFrame = Bitmap.createScaledBitmap(jumpOriginal, scaledW, scaledH, true);
+            y = 1400; // opcional: ajusta a altura da menina
+        } else {
+            jumpFrame = jumpOriginal;
+            y = 1400;
         }
     }
-
 
     public void update(float accelX) {
         x += accelX * 5;
@@ -49,23 +68,24 @@ public class Player {
         if (jumping) {
             velocityY += 1;
             y += velocityY;
-            if (y >= 1200) {
-                y = 1200;
+            if (y >= 1400) {
+                y = 1400;
                 jumping = false;
                 velocityY = 0;
             }
         }
 
-        // Atualiza animação
-        long now = System.currentTimeMillis();
-        if (now - lastFrameTime > frameInterval) {
-            currentFrame = (currentFrame + 1) % spriteFrames[currentCharacter].length;
-            lastFrameTime = now;
+        if (!jumping) {
+            long now = System.currentTimeMillis();
+            if (now - lastFrameTime > frameInterval) {
+                currentFrame = (currentFrame + 1) % walkFrames.length;
+                lastFrameTime = now;
+            }
         }
     }
 
     public void draw(Canvas canvas) {
-        Bitmap frame = spriteFrames[currentCharacter][currentFrame];
+        Bitmap frame = jumping ? jumpFrame : walkFrames[currentFrame];
         canvas.drawBitmap(frame, x, y, null);
     }
 
@@ -73,16 +93,17 @@ public class Player {
         if (!jumping) {
             jumping = true;
             velocityY = -30;
-            MediaPlayer.create(context, R.raw.jump_sound).start(); // jump_sound.wav em res/raw
+            MediaPlayer.create(context, R.raw.jump_sound).start();
         }
     }
 
     public void swapCharacter() {
         currentCharacter = (currentCharacter + 1) % 2;
+        loadSprites(); // recarrega sprites do personagem novo
     }
 
     public RectF getBounds() {
-        Bitmap frame = spriteFrames[currentCharacter][currentFrame];
+        Bitmap frame = jumping ? jumpFrame : walkFrames[currentFrame];
         return new RectF(x, y, x + frame.getWidth(), y + frame.getHeight());
     }
 

@@ -16,13 +16,13 @@
         android:id="@+id/btnWarrior"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Guerreiro" />
+        android:text="Menino" />
 
     <Button
         android:id="@+id/btnMage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Maga"
+        android:text="Menina"
         android:layout_marginBottom="40dp" />
 
     <Button
